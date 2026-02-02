@@ -21,6 +21,11 @@ import RatingVolumeChart from './charts/RatingVolumeChart';
 
 import './App.css';
 
+// DETECT ENVIRONMENT FOR API URL
+const API_BASE_URL = window.location.hostname === "localhost" 
+  ? "http://127.0.0.1:8000" 
+  : "https://your-backend-name.onrender.com"; // <--- REPLACE WITH YOUR RENDER URL
+
 function App() {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -60,7 +65,8 @@ function App() {
   const prevHypo = () => setHypoSlide((prev) => (prev - 1 + hypoSlides.length) % hypoSlides.length);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/data').then(res => {
+    // Fetch from Dynamic URL
+    axios.get(`${API_BASE_URL}/api/data`).then(res => {
       const rawData = res.data;
       setData(rawData);
       setFilteredData(rawData);
@@ -73,11 +79,12 @@ function App() {
       });
       setGenres(['All', ...Array.from(allGenres).sort()]);
       calculateKPIs(rawData);
-    });
+    }).catch(err => console.error("Deployment Error: Could not fetch data.", err));
   }, []);
 
   const calculateKPIs = (raw) => {
     const total = raw.length;
+    if (total === 0) return;
     const tv = raw.filter(d => d.type === 'TV Show').length;
     const multiCountry = raw.filter(d => d.country && d.country.includes(',')).length;
 
@@ -117,7 +124,8 @@ function App() {
       const canvas = await html2canvas(element, { 
         backgroundColor: "#141414", 
         scale: 2,
-        useCORS: true 
+        useCORS: true,
+        logging: false
       });
       const imgData = canvas.toDataURL('image/png');
       const ratio = canvas.width / canvas.height;
@@ -131,17 +139,24 @@ function App() {
       return { imgData, w: displayWidth, h: displayHeight };
     };
 
+    // Capture Main Dashboard Page
     const p1 = await capture(dashboardRef.current);
     pdf.addImage(p1.imgData, 'PNG', margin, margin, p1.w, p1.h);
 
+    // Capture All Detailed Charts (Hidden Section)
     const distributionElements = reportRef.current.children;
     for (let i = 0; i < distributionElements.length; i++) {
       pdf.addPage();
       const chartCapture = await capture(distributionElements[i]);
-      pdf.addImage(chartCapture.imgData, 'PNG', (pdfWidth - chartCapture.w) / 2, 15, chartCapture.w, chartCapture.h);
+      pdf.addImage(chartCapture.imgData, 'PNG', (pdfWidth - chartCapture.w) / 2, 20, chartCapture.w, chartCapture.h);
+      
+      // Add Page Numbers
+      pdf.setFontSize(10);
+      pdf.setTextColor(150);
+      pdf.text(`Page ${i + 2}`, pdfWidth / 2, pdfHeight - 10, { align: 'center' });
     }
 
-    pdf.save("Netflix_Comprehensive_Report.pdf");
+    pdf.save("Netflix_Strategic_Report.pdf");
   };
 
   return (
@@ -150,8 +165,8 @@ function App() {
         <header className="dashboard-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h1 className="main-title" style={{ color: '#E50914', margin: 0 }}>Netflix Strategy Dashboard</h1>
-            <button onClick={exportPDF} className="export-btn" style={{ padding: '10px 20px', backgroundColor: '#E50914', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-              Download Report
+            <button onClick={exportPDF} className="export-btn">
+              Download Full Report
             </button>
           </div>
           
@@ -165,15 +180,15 @@ function App() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', background: '#181818', padding: '20px', borderRadius: '10px', border: '1px solid #333', marginBottom: '30px' }}>
+          <div className="filter-panel">
             <div>
-              <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Primary Genre: </label>
+              <label>Primary Genre: </label>
               <select value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)} className="genre-select">
                 {genres.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <div>
-              <label style={{ fontWeight: 'bold', marginRight: '10px' }}>Compare With: </label>
+              <label>Compare With: </label>
               <select value={compareGenre} onChange={(e) => setCompareGenre(e.target.value)} className="genre-select compare">
                 <option value="None">None</option>
                 {genres.filter(g => g !== 'All').map(g => <option key={g} value={g}>{g}</option>)}
@@ -190,22 +205,20 @@ function App() {
 
           {/* SLIDER 1: DISTRIBUTION ANALYSIS */}
           <section className="chart-card slider-container">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <div className="slider-header">
               <button className="nav-arrow" onClick={prevDist}>&#10094;</button>
               <h2 style={{ margin: 0 }}>{distSlides[distSlide].title}</h2>
               <button className="nav-arrow" onClick={nextDist}>&#10095;</button>
             </div>
 
-            <p style={{ color: '#E50914', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold', textAlign: 'center' }}>
-              &larr; Explore Catalog Metrics &rarr;
-            </p>
+            <p className="explore-hint">&larr; Explore Catalog Metrics &rarr;</p>
 
             <div className="slide-content" style={{ minHeight: '400px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               {distSlide === 0 && (
-                <div style={{ textAlign: 'left', maxWidth: '90%', color: '#ccc', lineHeight: '1.6' }}>
-                   <h3 style={{ color: '#fff', marginBottom: '10px' }}>Strategic Content Overview</h3>
+                <div className="info-slide">
+                   <h3>Strategic Content Overview</h3>
                    <p>Navigate to decode the platform's content acquisition and retention strategy:</p>
-                   <ul style={{ paddingLeft: '20px', marginTop: '10px' }}>
+                   <ul>
                     <li><strong>Content Mix:</strong> Movies (Churn) vs TV Series (Retention).</li>
                     <li><strong>Maturity:</strong> Targeting specific household personas via Ratings.</li>
                     <li><strong>Age Depth:</strong> Balance of "Originals" vs. Licensed "Classics".</li>
@@ -222,56 +235,44 @@ function App() {
           </section>
 
           {/* SLIDER 2: STRATEGIC HYPOTHESES */}
-          <section className="chart-card full-width" style={{ gridColumn: '1 / -1' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <section className="chart-card full-width">
+            <div className="slider-header">
               <button className="nav-arrow" onClick={prevHypo}>&#10094;</button>
               <h2 style={{ margin: 0, color: '#E50914' }}>{hypoSlides[hypoSlide].title}</h2>
               <button className="nav-arrow" onClick={nextHypo}>&#10095;</button>
             </div>
             
-            <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px', textAlign: 'center', fontStyle: 'italic' }}>
-              &larr; Switch between strategic business hypotheses &rarr;
-            </p>
+            <p className="hypo-nav-hint">&larr; Switch between strategic business hypotheses &rarr;</p>
 
             <div className="slide-content" style={{ minHeight: '450px' }}>
               <AnimatePresence mode="wait">
                 {hypoSlide === 0 && (
                   <motion.div key="h0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <p className="hypothesis-statement" style={{ color: '#eee', marginBottom: '20px', textAlign: 'center' }}>
-                      "Netflix transitioned to a TV-Show-centric library after 2016 to increase subscriber retention."
-                    </p>
+                    <p className="hypothesis-statement">"Netflix transitioned to a TV-Show-centric library after 2016 to increase subscriber retention."</p>
                     <HypothesisChart data={data} />
                   </motion.div>
                 )}
                 {hypoSlide === 1 && (
                   <motion.div key="h1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <p className="hypothesis-statement" style={{ color: '#eee', marginBottom: '20px', textAlign: 'center' }}>
-                      "Netflix pivoted to International production to offset domestic market saturation."
-                    </p>
+                    <p className="hypothesis-statement">"Netflix pivoted to International production to offset domestic market saturation."</p>
                     <GlobalPivotChart data={data} />
                   </motion.div>
                 )}
                 {hypoSlide === 2 && (
                   <motion.div key="h2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <p className="hypothesis-statement" style={{ color: '#eee', marginBottom: '20px', textAlign: 'center' }}>
-                      "Netflix uses niche genres to maintain volume while focusing high budgets on 'Tentpole' categories."
-                    </p>
+                    <p className="hypothesis-statement">"Netflix uses niche genres to maintain volume while focusing high budgets on 'Tentpole' categories."</p>
                     <NicheDominanceChart data={data} />
                   </motion.div>
                 )}
                 {hypoSlide === 3 && (
                   <motion.div key="h3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <p className="hypothesis-statement" style={{ color: '#eee', marginBottom: '20px', textAlign: 'center' }}>
-                      "Netflix prioritizes a high-frequency release cycle of Originals to maintain 'Catalog Freshness'."
-                    </p>
+                    <p className="hypothesis-statement">"Netflix prioritizes a high-frequency release cycle of Originals to maintain 'Catalog Freshness'."</p>
                     <FreshnessLifecycleChart data={data} />
                   </motion.div>
                 )}
                 {hypoSlide === 4 && (
                   <motion.div key="h4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <p className="hypothesis-statement" style={{ color: '#eee', marginBottom: '20px', textAlign: 'center' }}>
-                      "Content maturity ratings are strategically distributed to capture both Adult and Family segments."
-                    </p>
+                    <p className="hypothesis-statement">"Content maturity ratings are strategically distributed to capture both Adult and Family segments."</p>
                     <RatingVolumeChart data={data} />
                   </motion.div>
                 )}
@@ -283,17 +284,17 @@ function App() {
 
       {/* Hidden Report Section for PDF Generation */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-        <div ref={reportRef} style={{ width: '800px', backgroundColor: '#141414' }}>
-          <div className="chart-card"><h2>Genre Heatmap</h2><CirclePacking data={filteredData} /></div>
-          <div className="chart-card"><h2>Content Format</h2><TypeDistribution data={filteredData} /></div>
-          <div className="chart-card"><h2>Ratings</h2><RatingDistribution data={filteredData} /></div>
-          <div className="chart-card"><h2>Release Years</h2><ReleaseDistribution data={filteredData} /></div>
-          <div className="chart-card"><h2>Duration</h2><DurationDistribution data={filteredData} /></div>
-          <div className="chart-card"><h2>TV Pivot</h2><HypothesisChart data={data} /></div>
-          <div className="chart-card"><h2>Global Pivot</h2><GlobalPivotChart data={data} /></div>
-          <div className="chart-card"><h2>Niche Dominance</h2><NicheDominanceChart data={data} /></div>
-          <div className="chart-card"><h2>Freshness Moat</h2><FreshnessLifecycleChart data={data} /></div>
-          <div className="chart-card"><h2>Maturity Mix</h2><RatingVolumeChart data={data} /></div>
+        <div ref={reportRef} style={{ width: '800px', backgroundColor: '#141414', padding: '40px' }}>
+          <div className="report-page"><h2>1. Genre Heatmap</h2><CirclePacking data={filteredData} /></div>
+          <div className="report-page"><h2>2. Content Format</h2><TypeDistribution data={filteredData} /></div>
+          <div className="report-page"><h2>3. Content Ratings</h2><RatingDistribution data={filteredData} /></div>
+          <div className="report-page"><h2>4. Release Years</h2><ReleaseDistribution data={filteredData} /></div>
+          <div className="report-page"><h2>5. Duration Distribution</h2><DurationDistribution data={filteredData} /></div>
+          <div className="report-page"><h2>6. Hypothesis: TV Pivot</h2><HypothesisChart data={data} /></div>
+          <div className="report-page"><h2>7. Hypothesis: Global Pivot</h2><GlobalPivotChart data={data} /></div>
+          <div className="report-page"><h2>8. Hypothesis: Niche Dominance</h2><NicheDominanceChart data={data} /></div>
+          <div className="report-page"><h2>9. Hypothesis: Freshness Moat</h2><FreshnessLifecycleChart data={data} /></div>
+          <div className="report-page"><h2>10. Hypothesis: Maturity Mix</h2><RatingVolumeChart data={data} /></div>
         </div>
       </div>
     </div>
