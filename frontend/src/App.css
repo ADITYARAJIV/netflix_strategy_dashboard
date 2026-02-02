@@ -1,0 +1,271 @@
+/* Netflix Dashboard Styling */
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: #141414;
+  color: white;
+}
+
+.App {
+  text-align: center;
+  padding: 50px;
+}
+
+.chart-container {
+  display: inline-block;
+  background: #181818;
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  margin-top: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+h1 {
+  color: #E50914; /* Netflix Red */
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.card {
+  background: #222;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 5px solid #E50914;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.chart-card {
+  background: #181818;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+  transition: transform 0.3s ease;
+}
+
+.chart-card:hover {
+  border-color: #E50914;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  background: #222;
+  padding: 10px 25px;
+  border-radius: 20px;
+  border: 1px solid #E50914;
+  font-weight: bold;
+}
+
+.genre-select {
+  background: #000;
+  color: #fff;
+  border: 1px solid #E50914;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.kpi-card {
+  background: #181818;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  cursor: help;
+  border: 1px solid #333;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 10;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.kpi-card:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.h-tooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.9);
+  padding: 15px;
+  border: 1px solid #E50914;
+  border-radius: 4px;
+  pointer-events: none;
+  font-family: sans-serif;
+}
+
+/* Container for the Genre Dropdowns */
+.filter-section {
+  margin-bottom: 30px;
+}
+
+.filter-section label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* Ensure the Hypothesis chart takes up the full bottom row */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Hypothesis statement styling */
+.hypothesis-statement {
+  color: #aaa;
+  font-size: 14px;
+  font-style: italic;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.nav-arrow {
+  background: #222;
+  color: #E50914;
+  border: 1px solid #444;
+  font-size: 20px;
+  padding: 8px 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-arrow:hover {
+  background: #E50914;
+  color: white;
+  transform: scale(1.1);
+}
+
+.slide-content {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chart-tooltip {
+  pointer-events: none; /* Prevents the tooltip from flickering when the mouse is over it */
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+  border: 1px solid #444;
+  transition: opacity 0.2s;
+}
+
+.report-page {
+  padding: 40px;
+  page-break-after: always;
+  color: white;
+  text-align: center;
+}
+
+.strategic-analysis-card {
+  text-align: left;
+  padding: 20px;
+  background: #000;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.business-impact-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid #E50914;
+}
+
+.business-impact-box ul {
+  list-style-type: square;
+  padding-left: 20px;
+}
+
+.business-impact-box li b {
+  color: #fff;
+}
+
+.hypothesis-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.strategic-analysis-overlay {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 500px;
+  background: rgba(0, 0, 0, 0.95); /* Semi-transparent black */
+  border: 1px solid #E50914;
+  padding: 20px;
+  border-radius: 12px;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  pointer-events: none; /* Allows hover to maintain even if mouse hits box */
+}
+
+.analysis-tag {
+  color: #E50914;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+
+.analysis-title {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.business-impact-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.business-impact-box ul {
+  list-style: square;
+  color: #ccc;
+  font-size: 0.9rem;
+  padding-left: 20px;
+  margin-top: 10px;
+}
