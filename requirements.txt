@@ -1,7 +1,10 @@
-pandas
-numpy
-notebook
-matplotlib
-seaborn
-fastapi
-uvicorn
+# API Server
+fastapi==0.115.0
+uvicorn==0.30.0
+
+# Utilities
+python-multipart==0.0.9
+pydantic==2.8.2
+pydantic-core==2.20.1
+annotated-types==0.7.0
+typing-extensions==4.12.2

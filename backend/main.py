@@ -22,12 +22,24 @@ app.add_middleware(
 
 # Helper function to get the absolute path to your data
 def get_json_data():
-    # This finds the directory where main.py sits and looks for the data folder relative to it
-    base_path = os.path.dirname(__file__)
-    path = os.path.join(base_path, 'data', 'processed', 'netflix_cleaned.json')
+    # This finds the directory where main.py is currently running
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    # We try two common paths just to be safe
+    # Path A: Data is in a folder next to main.py
+    path_a = os.path.join(current_dir, 'data', 'processed', 'netflix_cleaned.json')
+    # Path B: Data is one level up (if main.py is in a subfolder)
+    path_b = os.path.join(current_dir, '..', 'data', 'processed', 'netflix_cleaned.json')
+
+    if os.path.exists(path_a):
+        with open(path_a, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    elif os.path.exists(path_b):
+        with open(path_b, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        # This will tell us exactly WHERE the server is looking so we can fix it
+        raise FileNotFoundError(f"Checked: {path_a} and {path_b}. Current Dir: {current_dir}")
 
 @app.get("/api/data")
 def get_data():
