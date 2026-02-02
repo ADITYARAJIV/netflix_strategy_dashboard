@@ -22,17 +22,22 @@ app.add_middleware(
 
 # Helper function to get the absolute path to your data
 def get_json_data():
-    # Finds the folder where main.py is located
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Joins that path with the data location inside the same folder
-    path = os.path.join(base_dir, 'data', 'processed', 'netflix_cleaned.json')
+    # We join 'data/processed' as one string because that's how it appears in your repo
+    path = os.path.join(base_dir, 'data/processed', 'netflix_cleaned.json')
     
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Data file missing at: {path}")
+    # FALLBACK: If the above fails, check the standard nested way too
+    path_nested = os.path.join(base_dir, 'data', 'processed', 'netflix_cleaned.json')
 
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    elif os.path.exists(path_nested):
+        with open(path_nested, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        raise FileNotFoundError(f"Checked both: {path} and {path_nested}")
 
 @app.get("/api/data")
 def get_data():
