@@ -22,32 +22,17 @@ app.add_middleware(
 
 # Helper function to get the absolute path to your data
 def get_json_data():
-    # 1. Get the current working directory (where Render starts the app)
-    cwd = os.getcwd()
+    # Finds the folder where main.py is located
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 2. List of possible paths to check
-    # Path 1: If we are already inside 'backend'
-    # Path 2: If we need to look inside 'data' directly
-    # Path 3: The absolute path Render's error was showing
-    possible_paths = [
-        os.path.join(cwd, 'data', 'processed', 'netflix_cleaned.json'),
-        os.path.join(cwd, 'backend', 'data', 'processed', 'netflix_cleaned.json'),
-        '/opt/render/project/src/backend/data/processed/netflix_cleaned.json'
-    ]
+    # Joins that path with the data location inside the same folder
+    path = os.path.join(base_dir, 'data', 'processed', 'netflix_cleaned.json')
     
-    for path in possible_paths:
-        print(f"DEBUG: Checking path: {path}") # This will show in your Render Logs
-        if os.path.exists(path):
-            print(f"DEBUG: Found file at: {path}!")
-            with open(path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Data file missing at: {path}")
 
-    # 3. If none work, raise an error that lists EXACTLY what the folder looks like
-    files_in_cwd = os.listdir(cwd)
-    raise FileNotFoundError(
-        f"Could not find JSON. Checked {possible_paths}. "
-        f"CWD is {cwd}, which contains: {files_in_cwd}"
-    )
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 @app.get("/api/data")
 def get_data():
