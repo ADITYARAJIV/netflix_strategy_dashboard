@@ -22,7 +22,7 @@ import RatingVolumeChart from './charts/RatingVolumeChart';
 import './App.css';
 
 // DETECT ENVIRONMENT FOR API URL
-const API_BASE_URL = window.location.hostname === "localhost" 
+const API_BASE_URL = "https://netflix-strategy-dashboard-1.onrender.com";
   ? "http://127.0.0.1:8000" 
   : "https://your-backend-name.onrender.com"; // <--- REPLACE WITH YOUR RENDER URL
 
