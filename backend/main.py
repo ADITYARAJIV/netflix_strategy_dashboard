@@ -9,7 +9,7 @@ app = FastAPI()
 # Add your local development URL and your production Vercel URL
 origins = [
     "http://localhost:3000",
-    "https://netflix-strategy-dashboard.vercel.app/", # <--- REPLACE WITH YOUR ACTUAL VERCEL URL
+    "https://netflix-strategy-dashboard.vercel.app", # <--- REPLACE WITH YOUR ACTUAL VERCEL URL
 ]
 
 app.add_middleware(
